@@ -20,13 +20,13 @@ var score = 0;
 var lives = 3;
 //brick variables
 var brickRowCount = 3;
-var brickColumnCount = 5;
+var brickColumnCount = 7;
 var brickCount = brickRowCount * brickColumnCount;
-var brickWidth = 75;
-var brickHeight = 20;
+var brickWidth = 55;
+var brickHeight = 15;
 var brickPadding = 10;
 var brickOffsetTop = 30;
-var brickOffsetLeft = 30;
+var brickOffsetLeft = 15;
 var bricks = [];
 var notEmpty = true;
 for(var c=0; c<brickColumnCount; c++) {
@@ -141,25 +141,31 @@ function draw() {
     drawPaddle();
     drawBall();
     collisionDetection();
-    
+    //console.log(dx)
 
     if(x + dx > canvas.width-ballRadius || x + dx < ballRadius) {
         dx = -dx;
-        ctx.fillStyle = 'hsl(' + Math.floor(Math.random() * 360) + ', 50%, 50%)';
-        paddleWidth -= 1; 
-        addBrick();
+        ctx.fillStyle = 'hsl(' + Math.floor(Math.random() * 360) + ', 50%, 50%)'; 
+        
     }
     if( y + dy < ballRadius) {
         dy = -dy;
         ctx.fillStyle = 'hsl(' + Math.floor(Math.random() * 360) + ', 50%, 50%)';
-        paddleWidth -= 1; 
     }
-    else if (y + dy > canvas.height-ballRadius) {
-        if(x + ballRadius > paddleX && x - ballRadius < paddleX + paddleWidth) {
-            var da = (Math.floor(Math.random() * (2) + 1)) / 10;
-            dx += da;
-            dy += da;
+    else if (y + dy > canvas.height-ballRadius) {  //if touches bottom
+        if (x + ballRadius > paddleX && x - ballRadius < paddleX + paddleWidth) { //if within paddle
+            let hitPoint = x + ballRadius - paddleX
+            if (hitPoint < paddleWidth * 0.3) {
+                dx = -Math.abs(dx)
+                dx-=0.2
+            }
+            else if (hitPoint > paddleWidth * 0.7) {
+                dx = Math.abs(dx)
+                dx+=0.2
+            }   
             dy = -dy;
+            paddleWidth -= 1; 
+            addBrick();
         }
         else {
             lives--;
@@ -175,6 +181,14 @@ function draw() {
                 dy = -2;
                 paddleX = (canvas.width-paddleWidth)/2;
             }
+            clearInterval(interval);
+            draw()
+            setTimeout(() => {
+                console.log("lost one life")
+                interval = setInterval(draw, 10);
+            }, 1000);
+            ctx.fillText("Lost a life", canvas.width/2-40, canvas.height/2);
+            
         }
     }
     if(rightPressed) {
